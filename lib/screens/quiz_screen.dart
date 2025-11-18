@@ -36,9 +36,9 @@ class _QuizScreenState extends State<QuizScreen> {
       _answerSelected = true;
       if (selected == correct) {
         _score++;
-        _feedback = "Correct! The answer is $correct.";
+        _feedback = "✅ Correct! The answer is $correct.";
       } else {
-        _feedback = "Incorrect. The correct answer is $correct.";
+        _feedback = "❌ Incorrect. The correct answer is $correct.";
       }
     });
   }
@@ -48,6 +48,15 @@ class _QuizScreenState extends State<QuizScreen> {
       _currentIndex++;
       _answerSelected = false;
       _feedback = "";
+    });
+  }
+
+  void restartQuiz() {
+    setState(() {
+      _currentIndex = 0;
+      _score = 0;
+      _feedback = "";
+      _answerSelected = false;
     });
   }
 
@@ -61,11 +70,33 @@ class _QuizScreenState extends State<QuizScreen> {
 
     if (_currentIndex >= _questions.length) {
       return Scaffold(
-        appBar: AppBar(title: const Text("Quiz Finished")),
+        appBar: AppBar(
+          title: const Text("Quiz Completed"),
+          centerTitle: true,
+        ),
         body: Center(
-          child: Text(
-            "Your Score: $_score / ${_questions.length}",
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "🎉 Your Score",
+                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                "$_score / ${_questions.length}",
+                style: const TextStyle(fontSize: 24),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: restartQuiz,
+                child: const Text("Restart Quiz"),
+              ),
+            ],
           ),
         ),
       );
@@ -76,37 +107,70 @@ class _QuizScreenState extends State<QuizScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Question ${_currentIndex + 1} / ${_questions.length}"),
+        centerTitle: true,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              question.question,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  question.question,
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+                ),
+              ),
             ),
+
             const SizedBox(height: 20),
 
             ...question.options.map((option) {
-              return ElevatedButton(
-                onPressed: () => checkAnswer(option, question.correctAnswer),
-                child: Text(option),
+              return Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () => checkAnswer(option, question.correctAnswer),
+                  child: Text(option),
+                ),
               );
-            }).toList(),
+            }),
 
             const SizedBox(height: 20),
 
             if (_answerSelected)
-              Text(
-                _feedback,
-                style: const TextStyle(fontSize: 18, color: Colors.blue),
+              Card(
+                color: Colors.blue.shade50,
+                elevation: 2,
+                margin: const EdgeInsets.only(top: 10),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Text(
+                    _feedback,
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                ),
               ),
 
             if (_answerSelected)
-              ElevatedButton(
-                onPressed: nextQuestion,
-                child: const Text("Next Question"),
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: nextQuestion,
+                  child: const Text("Next Question"),
+                ),
               ),
           ],
         ),
